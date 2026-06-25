@@ -18,11 +18,12 @@ PyMuPDF
 pytesseract
 Pillow
 
-SpeechRecognition
-PyAudio
-
-pyttsx3
+faster-whisper
+sounddevice
+scipy
+numpy
 
 python-dotenv
 huggingface-hub
 tiktoken
+
