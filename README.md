@@ -45,7 +45,7 @@ A **Voice-enabled Retrieval-Augmented Generation (RAG)** chatbot built with **Py
                    │
                    ▼
         Text To Speech (TTS)
-             (pyttsx3)
+             (edge_tts)
                    │
                    ▼
               Voice Output
@@ -91,7 +91,7 @@ voice-rag/
 | Embeddings         | sentence-transformers/all-MiniLM-L6-v2 |
 | OCR                | PyMuPDF + Tesseract OCR                |
 | Speech Recognition | SpeechRecognition                      |
-| Text To Speech     | pyttsx3                                |
+| Text To Speech     | edge_tts                               |
 | Environment        | python-dotenv                          |
 
 ---
