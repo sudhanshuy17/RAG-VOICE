@@ -1,0 +1,28 @@
+1. create venv -> python -m venv .venv
+2. active venv -> .venv\Scripts\activate.bat
+3. install pakages -> pip -m install requirements.txt
+4. create folder structure
+5. architecture
+User Voice
+    ↓
+SpeechRecognition
+    ↓
+Text Query
+    ↓
+ChromaDB Search
+    ↓
+Relevant Chunks
+    ↓
+Groq LLM
+    ↓
+Answer
+    ↓
+pyttsx3
+    ↓
+Voice Output
+
+6. need ocr to scan the pdf (tessseract) -> ocr_loader.py
+7. vector_store.py 
+8. retriever.py
+9. voice model (speech_to_text.py -> listen function, text_to_speech.py -> speak function)
+10. app.py (get retriever, get llm, use listen() to get the user speech and generate the text, use speak and pass the response to get the voice output)
