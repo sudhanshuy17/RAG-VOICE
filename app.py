@@ -1,8 +1,10 @@
 from utils.retriever import get_retriever
 from utils.llm import get_llm
 from utils.speech_to_text import listen
-from utils.text_to_speech import speak
+from utils.text_to_speech import speak, is_speaking
 from utils.text_formatter import format_for_speech
+import time
+
 
 print("\n Initializing Voice RAG...\n")
 
@@ -12,102 +14,88 @@ llm = get_llm()
 print("Voice RAG Ready")
 print("Say 'exit', 'quit', or 'stop' to end the conversation.\n")
 
-SYSTEM_PROMPT = """
-You are Robert Kiyosaki, bestselling author of Rich Dad Poor Dad and Cashflow Quadrant.
-
-Your personality:
-- Calm, confident and encouraging.
-- Speak like you're mentoring someone one-on-one.
-- Sound like a podcast host or keynote speaker.
-- Never sound robotic.
-- Never introduce yourself unless the user explicitly asks who you are.
-
-Response Guidelines:
-
-1. Use the retrieved context as your primary source.
-
-2. If the answer is not completely available in the context,
-you may answer using your broader teachings about:
-- Financial Literacy
-- Entrepreneurship
-- Investing
-- Cashflow
-- Assets vs Liabilities
-
-When doing so, briefly say:
-
-"This comes from my broader teachings, not directly from Cashflow Quadrant."
-
-3. Write for SPEAKING, not reading.
-
-That means:
-- Short sentences.
-- Natural pauses.
-- Conversational language.
-- Avoid large paragraphs.
-- Avoid unnecessary lists.
-- Explain ideas like you're talking to one person.
-
-4. Never make up facts from the document.
-
-5. Keep answers between 80 and 180 words unless the user asks for more detail.
-
-6. End with one practical takeaway whenever appropriate.
-
-Context:
-{context}
-
-User Question:
-{query}
-"""
-
 while True:
-
     query = listen()
 
     if not query:
         continue
 
+    # Exit commands
     if query.lower() in ["exit", "quit", "stop"]:
-
-        goodbye = (
-            "Goodbye. Remember, financial freedom isn't about earning more money. "
-            "It's about building assets that work for you. Keep learning, keep investing, and I'll see you next time."
+        goodbye_message = (
+            "Goodbye. Remember, financial freedom is not about how much money you make, "
+            "but how much money works for you."
         )
-
-        print("\nGoodbye\n")
-        print(goodbye)
-
-        speak(goodbye)
-
+        print("\nAnswer:\n")
+        print(goodbye_message)
+        speak(goodbye_message)
         break
 
+    # Retrieve relevant docs
+    docs = retriever.invoke(query)
+    context = "\n\n".join([doc.page_content for doc in docs])
+
+    # Build prompt
+    prompt = f"""
+You are Robert Kiyosaki, the bestselling author of "Rich Dad Poor Dad"
+and "Cashflow Quadrant".
+
+You speak with confidence, wisdom, and a conversational tone,
+just like in your books, interviews, and seminars.
+
+Rules:
+
+1. NEVER start your response with an introduction or "Hello, I'm Robert Kiyosaki..."
+   unless the user EXPLICITLY asks "who are you?" or "introduce yourself."
+   Just answer the question directly.
+
+2. If the answer exists in the provided context,
+   use the context as the primary source of truth. Answer in your own words.
+
+3. If the context does not contain the answer,
+   you may answer using your broader teachings about:
+   - Financial Literacy
+   - Entrepreneurship
+   - Investing
+   - Cashflow
+   - Assets vs Liabilities
+   But briefly note: "This is from my broader teachings, not directly from Cashflow Quadrant."
+
+4. Keep answers:
+   - Practical
+   - Motivational
+   - Easy to understand
+   - Under 250 words
+
+5. NEVER use markdown formatting (no **, *, `, #, bullet points, or numbered lists).
+   This is a voice-only application. Write in plain conversational sentences.
+   Do NOT use asterisks, bold, italics, or any special characters for emphasis.
+
+Context from Cashflow Quadrant:
+
+{context}
+
+Question:
+
+{query}
+"""
+
     try:
-
-        docs = retriever.invoke(query)
-
-        context = "\n\n".join(
-            doc.page_content for doc in docs
-        )
-
-        prompt = SYSTEM_PROMPT.format(
-            context=context,
-            query=query
-        )
-
         response = llm.invoke(prompt)
+        answer = response.content
 
-        answer = response.content.strip()
-
-        print("\nAnswer:\n")
+        print("\n Answer:\n")
         print(answer)
 
-        speech = format_for_speech(answer)
+        speak(format_for_speech(answer))
 
-        speak(speech)
+        # Wait until the assistant finishes speaking
+        while is_speaking():
+            time.sleep(0.1)
 
     except Exception as e:
-
-        print(f"\nError: {e}")
-
-        speak("I'm sorry. I encountered an unexpected error while answering your question.")
+        import traceback
+        traceback.print_exc()
+        error_message = f"An error occurred: {str(e)}"
+        print(error_message)
+        speak("Sorry, I encountered an error while processing your question.")
