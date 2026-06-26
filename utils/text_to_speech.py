@@ -7,14 +7,16 @@ import tempfile
 import os
 import time
 
-VOICE = "en-US-ChristopherNeural"
+# VOICE = "en-US-ChristopherNeural"
+#VOICE = "en-US-BrianNeural"    # sounds well
+VOICE = "en-US-RogerNeural"
 
 async def _generate_audio(text, filename):
     # adjusted speaking rate so it could sound like a financial mentor
     communicate = edge_tts.Communicate(
         text=text,
         voice=VOICE,
-        rate="-10%",
+        rate="-5%",
         pitch="-2Hz"
     )
 
